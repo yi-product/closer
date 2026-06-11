@@ -77,17 +77,27 @@
     font-weight: 300;
     color: var(--text-dim);
     line-height: 1.8;
-    margin-bottom: 48px;
+    margin-bottom: 36px;
     opacity: 0;
     transform: translateY(10px);
     animation: fadeUp 0.8s ease 0.5s forwards;
+  }
+  .start-pick {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeUp 0.8s ease 0.7s forwards;
   }
   .start-btns {
     display: flex;
     gap: 16px;
     opacity: 0;
     transform: translateY(10px);
-    animation: fadeUp 0.8s ease 0.8s forwards;
+    animation: fadeUp 0.8s ease 0.9s forwards;
   }
   .start-btn {
     padding: 14px 36px;
@@ -260,9 +270,10 @@
     <div class="start-sub">
       你可以坐过来一点。
     </div>
+    <div class="start-pick">选一种聊法</div>
     <div class="start-btns">
-      <button class="start-btn" data-mode="classic">慢慢聊</button>
-      <button class="start-btn" data-mode="weird">不正经</button>
+      <button class="start-btn" data-mode="classic">先坐过来一点</button>
+      <button class="start-btn" data-mode="weird">我想吃掉你的</button>
     </div>
   </div>
 
