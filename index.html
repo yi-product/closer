@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>慢慢聊</title>
+<title>近一点</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Noto+Sans+SC:wght@300;400&display=swap');
 
@@ -82,8 +82,15 @@
     transform: translateY(10px);
     animation: fadeUp 0.8s ease 0.5s forwards;
   }
+  .start-btns {
+    display: flex;
+    gap: 16px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
   .start-btn {
-    padding: 14px 48px;
+    padding: 14px 36px;
     border: 1px solid var(--line);
     border-radius: 40px;
     font-family: inherit;
@@ -93,9 +100,6 @@
     cursor: pointer;
     letter-spacing: 2px;
     transition: all 0.3s ease;
-    opacity: 0;
-    transform: translateY(10px);
-    animation: fadeUp 0.8s ease 0.8s forwards;
   }
   .start-btn:hover, .start-btn:active {
     background: var(--text);
@@ -256,7 +260,10 @@
     <div class="start-sub">
       你可以坐过来一点。
     </div>
-    <button class="start-btn" id="btnStart">开始</button>
+    <div class="start-btns">
+      <button class="start-btn" data-mode="classic">慢慢聊</button>
+      <button class="start-btn" data-mode="weird">不正经</button>
+    </div>
   </div>
 
   <!-- Question -->
@@ -285,28 +292,50 @@
 </div>
 
 <script>
-const QUESTIONS = [
-  '如果可以跟世界上任何一个人吃顿饭，你会选谁？',
-  '你小时候有没有幻想过自己"变厉害"的那一天？是什么样的？',
-  '打电话或发消息之前，你会不会先在心里想好要说什么？上一次这样是跟谁？',
-  '对你来说，「完美的一天」长什么样？',
-  '你上次一个人哼歌是什么时候？你有在别人面前唱过歌吗？',
-  '如果能永远停在一个年纪，你选几岁？',
+const SETS = {
+  classic: [
+    '如果可以跟世界上任何一个人吃顿饭，你会选谁？',
+    '你小时候有没有幻想过自己"变厉害"的那一天？是什么样的？',
+    '打电话或发消息之前，你会不会先在心里想好要说什么？上一次这样是跟谁？',
+    '对你来说，「完美的一天」长什么样？',
+    '你上次一个人哼歌是什么时候？你有在别人面前唱过歌吗？',
+    '如果能永远停在一个年纪，你选几岁？',
+    '你有没有想象过自己老了以后的日子？',
+    '说出三个你和对面这个人的共同点。',
+    '你这辈子最感激的一件事是什么？',
+    '如果能改变你成长过程中的一件事，你会改什么？',
+    '讲一件发生在你身上的事——开心的、难过的、小时候的都行，只要你想说。',
+    '如果明天醒来你突然拥有了某种能力，你希望是什么？',
+    '如果有一个办法能让你提前知道一件事的结果，你想知道什么？',
+    '有没有一件事你心里想了很久，却一直没去做？是什么卡住了你？',
+    '你人生中最有成就感的时刻是什么？',
+    '在一段友谊里，你最看重的是什么？',
+    '你最珍贵的一段记忆是什么？',
+    '该你了——你可以问对方一个问题。',
+  ],
+  weird: [
+    '你做过最奇怪的梦是什么？能说多细说多细。',
+    '你有没有偷偷闻过一个人身上的味道？',
+    '你身上有没有一块伤疤？你还记不记得疼的那一下？',
+    '你现在，身体哪个部位最累？',
+    '如果你的情绪有气味，你觉得今天闻起来像什么？',
+    '你有没有一个念头，从来没说出口过，因为太奇怪了？',
+    '如果可以把一段记忆做成一颗糖，你选哪段？什么味道？',
+    '你觉得自己是容易碎的那种人，还是怎么摔都不会散？',
+    '如果你死了，愿意变成一件什么东西留在世上？',
+    '你有没有在深夜突然想起一件很久以前的事，然后完全睡不着？哪件？',
+    '如果可以吃掉对方的一个器官来获得ta的某种能力，你选哪个？',
+    '你上一次哭是什么时候？是被什么击中的？',
+    '如果你的人生到目前为止是一首歌，副歌部分在哪一段？',
+    '如果可以跟十年前的自己说一句话，但只能说三个字，你说什么？',
+    '你有没有一件事，嘴上说放下了，但身体还记得？',
+    '你觉得自己心脏跳得快还是慢？',
+    '如果对方明天就消失了，你最后想记住ta身上哪个细节？不许说性格。',
+    '轮到你了——你可以问我一个问题。',
+  ],
+};
 
-  '你有没有想象过自己老了以后的日子？',
-  '说出三个你和对面这个人的共同点。',
-  '你这辈子最感激的一件事是什么？',
-  '如果能改变你成长过程中的一件事，你会改什么？',
-  '讲一件发生在你身上的事——开心的、难过的、小时候的都行，只要你想说。',
-  '如果明天醒来你突然拥有了某种能力，你希望是什么？',
-
-  '如果有一个办法能让你提前知道一件事的结果，你想知道什么？',
-  '有没有一件事你心里想了很久，却一直没去做？是什么卡住了你？',
-  '你人生中最有成就感的时刻是什么？',
-  '在一段友谊里，你最看重的是什么？',
-  '你最珍贵的一段记忆是什么？',
-  '该你了——你可以问对方一个问题。',
-];
+let QUESTIONS = SETS.classic;
 
 const $ = id => document.getElementById(id);
 const setBg = v => {
@@ -422,9 +451,13 @@ function restart() {
 
 buildDots();
 
-$('btnStart').addEventListener('click', e => {
-  e.stopPropagation();
-  showQuestion(0);
+document.querySelectorAll('[data-mode]').forEach(btn => {
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    QUESTIONS = SETS[btn.dataset.mode];
+    buildDots();
+    showQuestion(0);
+  });
 });
 
 $('btnSkip').addEventListener('click', e => {
