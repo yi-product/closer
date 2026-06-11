@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>慢慢聊</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600&family=Noto+Sans+SC:wght@300;400&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg:       #FAFAF5;
+    --bg-end:   #F0EFE8;
+    --text:     #3D3D3D;
+    --text-dim: #8A8A82;
+    --accent:   #7D8B72;
+    --line:     #D4D0C8;
+    --dot:      #CCC8C0;
+    --dot-on:   #7D8B72;
+  }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.8s ease;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 420px;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 32px 80px;
+    position: relative;
+  }
+
+  /* ─── Screens: shared hide/show ─── */
+  .screen {
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex: 1;
+  }
+  .screen.active { display: flex; }
+
+  /* ─── Start ─── */
+  .start-title {
+    font-family: 'Noto Serif SC', 'Songti SC', serif;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    margin-bottom: 16px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+  .start-sub {
+    font-size: 15px;
+    font-weight: 300;
+    color: var(--text-dim);
+    line-height: 1.8;
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeUp 0.8s ease 0.5s forwards;
+  }
+  .start-btn {
+    padding: 14px 48px;
+    border: 1px solid var(--line);
+    border-radius: 40px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: transparent;
+    cursor: pointer;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeUp 0.8s ease 0.8s forwards;
+  }
+  .start-btn:hover, .start-btn:active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+
+  /* ─── Question ─── */
+  .q-text {
+    font-family: 'Noto Serif SC', 'Songti SC', serif;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.8;
+    max-width: 320px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .q-text.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .q-hint {
+    margin-top: 40px;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .q-hint.show { opacity: 0.4; }
+
+  /* ─── Bottom Bar (progress + skip) ─── */
+  .bottom-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 28px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  .bottom-bar.show { opacity: 1; }
+
+  .skip-btn {
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 300;
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 1px;
+    padding: 6px 16px;
+    margin-bottom: 12px;
+    opacity: 0.3;
+    transition: opacity 0.3s ease;
+    pointer-events: auto;
+  }
+  .skip-btn:hover, .skip-btn:active { opacity: 0.6; }
+
+  .dots {
+    display: flex;
+    gap: 6px;
+  }
+  .dots .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--dot);
+    transition: background 0.4s ease, transform 0.4s ease;
+  }
+  .dots .dot.current {
+    background: var(--dot-on);
+    transform: scale(1.4);
+  }
+  .dots .dot.done {
+    background: var(--text-dim);
+  }
+
+  /* ─── End ─── */
+  .end-card {
+    padding: 48px 40px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .end-card.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  .end-line {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, transparent, var(--text-dim), transparent);
+    margin: 0 auto 24px;
+  }
+  .end-msg {
+    font-family: 'Noto Serif SC', 'Songti SC', serif;
+    font-size: 18px;
+    font-weight: 400;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+  }
+  .end-date {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+  .end-count {
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-dim);
+  }
+  .restart-btn {
+    margin-top: 40px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 300;
+    color: var(--text-dim);
+    background: none;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 1px;
+    opacity: 0;
+    transition: opacity 0.5s ease 1.2s;
+    padding: 8px 20px;
+  }
+  .end-card.show ~ .restart-btn,
+  .screen.active .restart-btn { opacity: 0.4; }
+  .restart-btn:hover { opacity: 0.7; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Start -->
+  <div class="screen active" id="scrStart">
+    <div class="start-title">慢慢聊</div>
+    <div class="start-sub">
+      坐近一点，慢慢聊。
+    </div>
+    <button class="start-btn" id="btnStart">开始</button>
+  </div>
+
+  <!-- Question -->
+  <div class="screen" id="scrQ">
+    <div class="q-text" id="qText"></div>
+    <div class="q-hint" id="qHint">说完了就点一下屏幕</div>
+  </div>
+
+  <!-- End -->
+  <div class="screen" id="scrEnd">
+    <div class="end-card" id="endCard">
+      <div class="end-line"></div>
+      <div class="end-msg">我们刚刚聊过了</div>
+      <div class="end-date" id="endDate"></div>
+      <div class="end-count" id="endCount"></div>
+    </div>
+    <button class="restart-btn" id="btnRestart">从头再来</button>
+  </div>
+
+</div>
+
+<!-- Bottom bar -->
+<div class="bottom-bar" id="bottomBar">
+  <button class="skip-btn" id="btnSkip">跳过这题</button>
+  <div class="dots" id="dots"></div>
+</div>
+
+<script>
+const QUESTIONS = [
+  '如果可以跟世界上任何一个人吃顿饭，你会选谁？',
+  '你有没有想过「出名」？如果有，想因为什么被人记住？',
+  '打电话或发消息之前，你会不会先在心里想好要说什么？上一次这样是跟谁？',
+  '对你来说，「完美的一天」长什么样？',
+  '你上次一个人哼歌是什么时候？你有在别人面前唱过歌吗？',
+  '如果能永远停在 30 岁，你想保留那时的身体，还是那时的心态？',
+
+  '你有没有想象过自己老了以后的日子？',
+  '说出三个你和对面这个人的共同点。',
+  '你这辈子最感激的一件事是什么？',
+  '如果能改变你成长过程中的一件事，你会改什么？',
+  '讲一段你自己的故事——哪一段都行，你想讲的那段。',
+  '如果明天醒来你突然拥有了某种能力，你希望是什么？',
+
+  '如果有个水晶球能告诉你关于未来的一件事，你想问什么？',
+  '有没有一件事你心里想了很久，却一直没去做？是什么卡住了你？',
+  '你人生中最有成就感的时刻是什么？',
+  '在一段友谊里，你最看重的是什么？',
+  '你最珍贵的一段记忆是什么？',
+  '该你了——你可以问对方一个问题。',
+];
+
+const $ = id => document.getElementById(id);
+const setBg = v => {
+  document.body.style.background =
+    getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+};
+
+let current = 0;
+let answered = 0;
+let locked = false;
+
+const scrStart = $('scrStart');
+const scrQ     = $('scrQ');
+const scrEnd   = $('scrEnd');
+const qText    = $('qText');
+const qHint    = $('qHint');
+const bottomBar = $('bottomBar');
+const endCard   = $('endCard');
+const dotsEl    = $('dots');
+
+function show(scr) {
+  [scrStart, scrQ, scrEnd].forEach(s => s.classList.remove('active'));
+  scr.classList.add('active');
+}
+
+function buildDots() {
+  dotsEl.innerHTML = '';
+  for (let i = 0; i < QUESTIONS.length; i++) {
+    const d = document.createElement('span');
+    d.className = 'dot';
+    d.dataset.i = i;
+    dotsEl.appendChild(d);
+  }
+}
+
+function updateDots(idx) {
+  dotsEl.querySelectorAll('.dot').forEach(d => {
+    const i = parseInt(d.dataset.i);
+    d.classList.toggle('done', i < idx);
+    d.classList.toggle('current', i === idx);
+  });
+}
+
+function lock(ms) {
+  locked = true;
+  setTimeout(() => { locked = false; }, ms);
+}
+
+function haptic() {
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+
+function showQuestion(idx) {
+  current = idx;
+
+  qText.classList.remove('show');
+  qHint.classList.remove('show');
+
+  show(scrQ);
+  qText.textContent = QUESTIONS[idx];
+  bottomBar.classList.add('show');
+  updateDots(idx);
+
+  requestAnimationFrame(() => {
+    qText.classList.add('show');
+    setTimeout(() => qHint.classList.add('show'), 1200);
+  });
+  lock(1000);
+}
+
+function advance(skip) {
+  if (locked) return;
+  haptic();
+
+  if (!skip) answered++;
+
+  qText.classList.remove('show');
+  qHint.classList.remove('show');
+  lock(2000);
+
+  setTimeout(() => {
+    const next = current + 1;
+    if (next >= QUESTIONS.length) {
+      showEnd();
+    } else {
+      showQuestion(next);
+    }
+  }, 400);
+}
+
+function showEnd() {
+  bottomBar.classList.remove('show');
+  setBg('--bg-end');
+  show(scrEnd);
+
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  $('endDate').textContent = `${y}.${m}.${d}`;
+  $('endCount').textContent = `${answered} 个问题`;
+
+  requestAnimationFrame(() => endCard.classList.add('show'));
+}
+
+function restart() {
+  current = 0;
+  answered = 0;
+  endCard.classList.remove('show');
+  setBg('--bg');
+  showQuestion(0);
+}
+
+buildDots();
+
+$('btnStart').addEventListener('click', e => {
+  e.stopPropagation();
+  showQuestion(0);
+});
+
+$('btnSkip').addEventListener('click', e => {
+  e.stopPropagation();
+  if (!scrQ.classList.contains('active')) return;
+  advance(true);
+});
+
+$('btnRestart').addEventListener('click', e => {
+  e.stopPropagation();
+  restart();
+});
+
+document.addEventListener('click', () => {
+  if (!scrQ.classList.contains('active')) return;
+  advance(false);
+});
+
+let touchY = 0;
+document.addEventListener('touchstart', e => {
+  touchY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchend', e => {
+  if (!scrQ.classList.contains('active')) return;
+  const dy = touchY - e.changedTouches[0].clientY;
+  if (dy > 50) advance(false);
+});
+</script>
+
+</body>
+</html>
